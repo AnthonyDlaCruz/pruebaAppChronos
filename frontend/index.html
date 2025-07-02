@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Órdenes de Trabajo - Odoo</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-family: Arial, sans-serif;
+    }
+    th, td {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background: #333;
+      color: white;
+    }
+    .progress-bar {
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      height: 16px;
+      width: 100px;
+      margin: 0 auto;
+    }
+    .progress-fill {
+      height: 100%;
+      background-color: #4caf50;
+      width: 0%;
+      transition: width 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <h1>Órdenes de Trabajo desde Odoo</h1>
+  <table>
+  <thead>
+    <tr>
+      <th>Orden de Producción</th>
+      <th>Producto</th>
+      <th>Cantidad Total</th>
+      <th>Cantidad Hecha</th>
+      <th>Cliente</th>
+      <th>Estado</th>
+      <th>Avance (%)</th>
+    </tr>
+  </thead>
+  <tbody id="tabla-body"></tbody>
+</table>
+
+<script>
+  fetch('http://localhost:3000/api/productionorders')
+    .then(res => res.json())
+    .then(data => {
+      const body = document.getElementById('tabla-body');
+      body.innerHTML = ''; // limpiar
+
+      data.forEach(grupo => {
+        // Crear una fila de título para el pedido
+        const pedidoRow = document.createElement('tr');
+        pedidoRow.innerHTML = `
+          <td colspan="7" style="background:#f0f0f0; font-weight:bold; text-align:left;">
+            Pedido de Venta: ${grupo.pedido}
+          </td>
+        `;
+        body.appendChild(pedidoRow);
+
+        // Agregar cada orden de producción
+        grupo.ordenes.forEach(row => {
+          const tr = document.createElement('tr');
+          const progress = row.progress ?? 0;
+
+          tr.innerHTML = `
+            <td>${row.name}</td>
+            <td>${row.product}</td>
+            <td>${row.qty_total}</td>
+            <td>${row.qty_done}</td>
+            <td>${row.cliente}</td>
+            <td>${row.state}</td>
+            <td>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progress}%;"></div>
+              </div>
+              <div>${progress}%</div>
+            </td>
+          `;
+          body.appendChild(tr);
+        });
+      });
+    });
+</script>
+
+</body>
+</html>
