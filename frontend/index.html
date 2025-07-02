@@ -52,7 +52,7 @@
 </table>
 
 <script>
-  fetch('http://localhost:3000/api/productionorders')
+  fetch('https://chronos-backend-3nni.onrender.com/api/productionorders')
     .then(res => res.json())
     .then(data => {
       const body = document.getElementById('tabla-body');
