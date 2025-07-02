@@ -15,6 +15,11 @@ app.get('/api/productionorders', async (req, res) => {
   }
 });
 
+// Ruta para healthcheck
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // ✅ Puerto dinámico para que Render funcione
 const PORT = process.env.PORT || 3000;
 
