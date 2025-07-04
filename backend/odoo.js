@@ -1,12 +1,12 @@
 import Odoo from 'odoo-xmlrpc';
 
-// ⚠️ Reemplaza estos valores por los reales de tu instancia Odoo
 const odoo = new Odoo({
     url: 'https://hidro.chronosps.app/',
     port: 443,
     db: 'hidrotest',
     username: 'simon@chronosps.cl',
     password: '6010ad7229d4653763058abaae61e0607f4b8e74'
+
 });
 
 // Función para obtener órdenes de producción
@@ -32,11 +32,7 @@ export const getProductionOrders = () =>
 
         // Agrupar (pedido de venta)
         const grouped = {};
-        const origins = [...new Set(
-          productions
-            .map(p => p.origin)
-            .filter(origin => origin && origin.startsWith('SO/')) // ✅ Solo notas de venta reales
-        )];
+        const origins = [...new Set(productions.map(p => p.origin).filter(Boolean))];
 
         const originToClient = {};
 
@@ -61,10 +57,7 @@ export const getProductionOrders = () =>
 
         // Armar la estructura final agrupada
         for (const order of productions) {
-          const origin = order.origin || 'Sin origen';
-          const esNotaVenta = origin.startsWith('SO/');
-
-          const agrupador = esNotaVenta ? origin : 'Sin nota de venta';
+          const origin = order.origin || 'Sin Pedido';
           const progress = order.qty_produced && order.product_qty
             ? (order.qty_produced / order.product_qty) * 100
             : 0;
@@ -76,12 +69,11 @@ export const getProductionOrders = () =>
             qty_done: order.qty_produced,
             state: order.state,
             progress: progress.toFixed(2),
-            cliente: esNotaVenta ? originToClient[origin] || 'N/D' : 'N/A',
-            nota_venta: agrupador
+            cliente: originToClient[order.origin] || 'N/D'
           };
 
-          if (!grouped[agrupador]) grouped[agrupador] = [];
-          grouped[agrupador].push(item);
+          if (!grouped[origin]) grouped[origin] = [];
+          grouped[origin].push(item);
         }
 
         const final = Object.entries(grouped).map(([pedido, ordenes]) => ({
@@ -92,4 +84,4 @@ export const getProductionOrders = () =>
         resolve(final);
       });
     });
-  });
+  }); 
